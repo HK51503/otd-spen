@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4C7DBC39-E253-4861-BC78-91DCE636115F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPen.Evdev", "src\SPen.Evdev\SPen.Evdev.csproj", "{3E0914B0-6379-4E7B-986A-BDA410F6C70A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{8A40B5B0-7F73-4947-8231-06F86849F07B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPen.Probe", "tools\SPen.Probe\SPen.Probe.csproj", "{705D498E-B4B3-4B7A-A634-AC598E8434A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPen.OpenTabletDriver", "src\SPen.OpenTabletDriver\SPen.OpenTabletDriver.csproj", "{D7BF1888-A186-4E70-A596-748AB85C2783}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPen.PluginHarness", "tools\SPen.PluginHarness\SPen.PluginHarness.csproj", "{8294309D-F96F-45FA-AB51-7C721E10CCB0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3E0914B0-6379-4E7B-986A-BDA410F6C70A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E0914B0-6379-4E7B-986A-BDA410F6C70A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E0914B0-6379-4E7B-986A-BDA410F6C70A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E0914B0-6379-4E7B-986A-BDA410F6C70A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{705D498E-B4B3-4B7A-A634-AC598E8434A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{705D498E-B4B3-4B7A-A634-AC598E8434A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{705D498E-B4B3-4B7A-A634-AC598E8434A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{705D498E-B4B3-4B7A-A634-AC598E8434A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7BF1888-A186-4E70-A596-748AB85C2783}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7BF1888-A186-4E70-A596-748AB85C2783}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7BF1888-A186-4E70-A596-748AB85C2783}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7BF1888-A186-4E70-A596-748AB85C2783}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8294309D-F96F-45FA-AB51-7C721E10CCB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8294309D-F96F-45FA-AB51-7C721E10CCB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8294309D-F96F-45FA-AB51-7C721E10CCB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8294309D-F96F-45FA-AB51-7C721E10CCB0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3E0914B0-6379-4E7B-986A-BDA410F6C70A} = {4C7DBC39-E253-4861-BC78-91DCE636115F}
+		{705D498E-B4B3-4B7A-A634-AC598E8434A3} = {8A40B5B0-7F73-4947-8231-06F86849F07B}
+		{D7BF1888-A186-4E70-A596-748AB85C2783} = {4C7DBC39-E253-4861-BC78-91DCE636115F}
+		{8294309D-F96F-45FA-AB51-7C721E10CCB0} = {8A40B5B0-7F73-4947-8231-06F86849F07B}
+	EndGlobalSection
+EndGlobal

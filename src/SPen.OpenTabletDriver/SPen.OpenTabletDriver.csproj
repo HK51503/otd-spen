@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>SPen.OpenTabletDriver</RootNamespace>
+    <!-- OTD loads every dll in the plugin folder; copy SPen.Evdev next to us. -->
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Provided by OpenTabletDriver at runtime; don't ship it with the plugin. -->
+    <PackageReference Include="OpenTabletDriver.Plugin" Version="0.6.6.2" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SPen.Evdev\SPen.Evdev.csproj" />
+  </ItemGroup>
+
+</Project>

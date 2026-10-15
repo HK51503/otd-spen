@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="false"
+        android:label="otd-spen"
+        android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
+
+        <!--
+            reverseLandscape (ROTATION_270) matches the plugin's tablet frame. The sensor is useless for a phone
+            lying flat on a desk, so MainActivity switches orientation based on OTD's area rotation instead.
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="reverseLandscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+            Receives the OTD area from the PC plugin via `adb shell am broadcast`.
+            Requiring DUMP means only the adb shell (and the system) can send it, not other apps.
+        -->
+        <receiver
+            android:name=".AreaReceiver"
+            android:exported="true"
+            android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="dev.otdspen.SET_AREA" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
