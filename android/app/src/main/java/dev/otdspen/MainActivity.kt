@@ -4,16 +4,21 @@ import android.app.Activity
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
+import android.widget.FrameLayout
 
 /**
  * A black, full-screen surface for the S Pen: swallows all input so nothing on the phone reacts,
- * keeps the screen on at the highest refresh rate, and draws OTD's area.
+ * keeps the screen on at the highest refresh rate, and draws OTD's area. Until USB debugging is
+ * set up and connected, a setup guide is shown on top.
  */
 class MainActivity : Activity() {
     private lateinit var view: AreaView
+    private lateinit var setupGuide: SetupGuideView
+    private lateinit var usbDebugging: UsbDebuggingMonitor
     private lateinit var prefs: SharedPreferences
 
     private val areaListener = SharedPreferences.OnSharedPreferenceChangeListener { p, _ ->
@@ -32,7 +37,16 @@ class MainActivity : Activity() {
         window.setDecorFitsSystemWindows(false)
 
         view = AreaView(this)
-        setContentView(view)
+        setupGuide = SetupGuideView(this)
+        setContentView(FrameLayout(this).apply {
+            addView(view)
+            addView(setupGuide)
+        })
+
+        usbDebugging = UsbDebuggingMonitor(this) { state ->
+            setupGuide.update(state)
+            setupGuide.visibility = if (state.ready) View.GONE else View.VISIBLE
+        }
 
         prefs = Area.prefs(this)
         showArea(Area.load(prefs))
@@ -50,6 +64,17 @@ class MainActivity : Activity() {
         else
             ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
         view.area = area
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Also re-checks when coming back from the Settings pages the guide opens.
+        usbDebugging.start()
+    }
+
+    override fun onStop() {
+        usbDebugging.stop()
+        super.onStop()
     }
 
     override fun onResume() {
