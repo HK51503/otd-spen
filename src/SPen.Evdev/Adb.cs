@@ -57,15 +57,31 @@ namespace SPen.Evdev
         }
 
         /// <summary>Serials of devices in the "device" state.</summary>
-        public List<string> ListDevices()
+        public List<string> ListDevices() =>
+            ListDeviceStates().Where(d => d.State == "device").Select(d => d.Serial).ToList();
+
+        /// <summary>
+        /// Every device adb knows about with its state: "device", "unauthorized", "offline",
+        /// "no permissions (...)" on Linux without udev rules, etc.
+        /// </summary>
+        public List<(string Serial, string State)> ListDeviceStates()
         {
             var output = Run("devices").StdOut;
             return output.Split('\n')
                 .Skip(1)
-                .Select(l => l.Trim().Split('\t'))
-                .Where(parts => parts.Length == 2 && parts[1] == "device")
-                .Select(parts => parts[0])
+                .Select(l => l.Trim().Split('\t', 2))
+                .Where(parts => parts.Length == 2)
+                .Select(parts => (parts[0], parts[1].Trim()))
                 .ToList();
+        }
+
+        /// <summary>First line of <c>adb version</c>, e.g. "Android Debug Bridge version 1.0.41".</summary>
+        public string Version()
+        {
+            var result = Run("version");
+            var lines = result.StdOut.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            // Line 2 is "Version 37.0.1-...", the platform-tools release, which is the more useful one.
+            return string.Join(", ", lines.Take(2).Select(l => l.Trim()));
         }
 
         public (int ExitCode, string StdOut, string StdErr) Run(params string[] args)

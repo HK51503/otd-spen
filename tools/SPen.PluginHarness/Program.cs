@@ -9,20 +9,31 @@ using SPen.OpenTabletDriver;
 // spen-harness: exercises the OTD plugin against a real phone without OpenTabletDriver installed.
 //
 //   spen-harness <config-dir> [seconds]
+//   spen-harness --provision      download/verify the pinned adb (outside OTD it goes under the user's local app data)
 //
 // Mirrors what OTD does: hub discovery -> configuration match (Driver.GetMatchingDevices) ->
 // open endpoint -> DeviceReader loop -> parse each report twice (as the tablet debugger does).
 
 if (args.Length < 1)
 {
-    Console.Error.WriteLine("usage: spen-harness <config-dir> [seconds]");
+    Console.Error.WriteLine("usage: spen-harness <config-dir> [seconds] | --provision");
     return 2;
+}
+
+Log.Output += (_, message) => Console.WriteLine($"  [log {message.Level}] {message.Group}: {message.Message}");
+
+if (args[0] == "--provision")
+{
+    var provisioned = AdbProvisioner.Ensure();
+    if (provisioned == null)
+        return 1;
+    Console.WriteLine($"adb: {provisioned}");
+    Console.WriteLine(new SPen.Evdev.Adb(provisioned).Version());
+    return 0;
 }
 
 string configDir = args[0];
 double seconds = args.Length > 1 ? double.Parse(args[1]) : 10;
-
-Log.Output += (_, message) => Console.WriteLine($"  [log {message.Level}] {message.Group}: {message.Message}");
 
 // 1. Hub discovery
 using var hub = new AdbSPenHub(adbPath: null, () => configDir);

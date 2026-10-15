@@ -27,6 +27,11 @@ namespace SPen.OpenTabletDriver
         [ToolTip("Path to the adb executable. Leave empty to find it automatically (PATH, ANDROID_HOME, default SDK locations).")]
         public string? AdbPath { set; get; }
 
+        [BooleanProperty("Download adb", "If no adb is installed, download Google's Android platform-tools "
+            + AdbProvisioner.Version + " (Android SDK terms apply) into OpenTabletDriver's data folder.")]
+        [DefaultPropertyValue(true)]
+        public bool DownloadAdb { set; get; } = true;
+
         [BooleanProperty("Open companion app", "Open the otd-spen app on the phone when it connects.")]
         [DefaultPropertyValue(true)]
         public bool LaunchCompanion { set; get; } = true;
@@ -39,6 +44,7 @@ namespace SPen.OpenTabletDriver
                 {
                     _hub.AdbPath = AdbPath;
                     _hub.LaunchCompanion = LaunchCompanion;
+                    _hub.DownloadAdb = DownloadAdb;
 
                     // Tools are re-initialized after every settings apply, once output modes are set up,
                     // so this is where area changes reach the phone. adb is slow-ish; don't block the apply.
@@ -58,6 +64,7 @@ namespace SPen.OpenTabletDriver
                 _hub = new AdbSPenHub(AdbPath, SPenTabletConfiguration.FindOtdConfigurationDirectory)
                 {
                     LaunchCompanion = LaunchCompanion,
+                    DownloadAdb = DownloadAdb,
                 };
                 composite.ConnectDeviceHub(_hub);
                 _hub.Start();

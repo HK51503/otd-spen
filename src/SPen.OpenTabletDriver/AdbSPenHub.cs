@@ -25,9 +25,11 @@ namespace SPen.OpenTabletDriver
         private readonly Dictionary<string, AdbSPenEndpoint> _endpoints = new();
         private readonly Dictionary<string, DateTime> _unsupported = new();
         private readonly CancellationTokenSource _cts = new();
+        private readonly Dictionary<string, string> _notReadyStates = new();
         private readonly Func<string?> _configurationDirectory;
         private Thread? _thread;
         private string? _lastAdbError;
+        private string? _lastAdbPath;
 
         /// <param name="adbPath">adb executable; null to locate it automatically.</param>
         /// <param name="configurationDirectory">Where to install tablet configurations; returns null if unknown.</param>
@@ -44,6 +46,9 @@ namespace SPen.OpenTabletDriver
 
         /// <summary>Open the companion app when a phone connects.</summary>
         public bool LaunchCompanion { get; set; } = true;
+
+        /// <summary>Download the pinned platform-tools when no adb is installed.</summary>
+        public bool DownloadAdb { get; set; } = true;
 
         public IEnumerable<IDeviceEndpoint> GetDevices()
         {
@@ -70,7 +75,9 @@ namespace SPen.OpenTabletDriver
             List<string> serials;
             try
             {
-                serials = adb.ListDevices();
+                var states = adb.ListDeviceStates();
+                serials = states.Where(d => d.State == "device").Select(d => d.Serial).ToList();
+                ReportNotReady(states);
                 _lastAdbError = null;
             }
             catch (Exception ex)
@@ -189,15 +196,77 @@ namespace SPen.OpenTabletDriver
             DevicesChanged?.Invoke(this, new DevicesChangedEventArgs(previous, GetDevices()));
         }
 
+        /// <summary>
+        /// The tool's adb path, else an installed adb, else the pinned download.
+        /// </summary>
+        /// <remarks>
+        /// An installed adb wins over the download: two adb versions on one machine keep killing each other's
+        /// server ("adb server version doesn't match this client"), which would cut the pen stream whenever
+        /// e.g. Android Studio runs its own.
+        /// </remarks>
         private Adb? ResolveAdb()
         {
-            string? path = string.IsNullOrWhiteSpace(AdbPath) ? Adb.Locate() : AdbPath;
+            string? path = !string.IsNullOrWhiteSpace(AdbPath) ? AdbPath
+                : Adb.Locate()
+                ?? (AdbProvisioner.IsInstalled || DownloadAdb ? AdbProvisioner.Ensure() : null);
+
             if (path == null)
             {
-                LogOnce("adb not found. Install Android platform-tools or set the adb path in the S Pen tool settings.");
+                if (!DownloadAdb)
+                    LogOnce("adb not found. Install Android platform-tools, set the adb path, or enable \"Download adb\" in the S Pen tool.");
                 return null;
             }
-            return new Adb(path);
+
+            var adb = new Adb(path);
+            if (path != _lastAdbPath)
+            {
+                _lastAdbPath = path;
+                string version;
+                try { version = adb.Version(); }
+                catch (Exception ex) { version = $"version unknown: {ex.Message}"; }
+                Log.Write("S Pen", $"Using adb '{path}' ({version})");
+            }
+            return adb;
+        }
+
+        /// <summary>
+        /// Tells the user, once per change, about phones adb sees but can't use yet.
+        /// </summary>
+        private void ReportNotReady(List<(string Serial, string State)> states)
+        {
+            foreach (var (serial, state) in states)
+            {
+                if (state == "device")
+                {
+                    _notReadyStates.Remove(serial);
+                    continue;
+                }
+
+                if (_notReadyStates.TryGetValue(serial, out var reported) && reported == state)
+                    continue;
+                _notReadyStates[serial] = state;
+
+                if (state == "unauthorized")
+                {
+                    Log.WriteNotify("S Pen", $"Phone {serial} is waiting for USB debugging approval. On the phone, " +
+                        "tick \"Always allow from this computer\" and tap Allow. No prompt? Unplug and replug the cable.",
+                        LogLevel.Warning);
+                }
+                else if (state.StartsWith("no permissions"))
+                {
+                    Log.WriteNotify("S Pen", $"No permission to access phone {serial} over USB ({state}). " +
+                        "On Linux, install udev rules for Android devices (e.g. the android-udev-rules package).",
+                        LogLevel.Warning);
+                }
+                else
+                {
+                    Log.Write("S Pen", $"Phone {serial} is {state}; waiting for it to come online.", LogLevel.Warning);
+                }
+            }
+
+            // Forget unplugged phones so the message shows again next time.
+            foreach (var serial in _notReadyStates.Keys.Except(states.Select(s => s.Serial)).ToList())
+                _notReadyStates.Remove(serial);
         }
 
         private void LogOnce(string message)

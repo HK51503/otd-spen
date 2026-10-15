@@ -103,8 +103,7 @@ namespace SPen.OpenTabletDriver
         }
 
         /// <summary>
-        /// OTD's user configuration directory (<c>AppInfo.Current.ConfigurationDirectory</c>). It lives in
-        /// OpenTabletDriver.Desktop, which plugins can't reference, so look it up reflectively.
+        /// OTD's user configuration directory.
         /// </summary>
         /// <remarks>
         /// When no Configurations folder exists yet, OTD resolves it to <c>$CWD/Configurations</c>, which for a
@@ -113,27 +112,12 @@ namespace SPen.OpenTabletDriver
         /// </remarks>
         public static string? FindOtdConfigurationDirectory()
         {
-            try
-            {
-                var appInfoType = AppDomain.CurrentDomain.GetAssemblies()
-                    .Select(a => a.GetType("OpenTabletDriver.Desktop.AppInfo", throwOnError: false))
-                    .FirstOrDefault(t => t != null);
-                var current = appInfoType?.GetProperty("Current", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
-                if (current == null)
-                    return null;
+            var configurationDirectory = OtdAppInfo.ConfigurationDirectory;
+            if (configurationDirectory != null && Directory.Exists(configurationDirectory))
+                return configurationDirectory;
 
-                var configurationDirectory = current.GetType().GetProperty("ConfigurationDirectory")?.GetValue(current) as string;
-                if (configurationDirectory != null && Directory.Exists(configurationDirectory))
-                    return configurationDirectory;
-
-                var appDataDirectory = current.GetType().GetProperty("AppDataDirectory")?.GetValue(current) as string;
-                return appDataDirectory != null ? Path.Combine(appDataDirectory, "Configurations") : configurationDirectory;
-            }
-            catch (Exception ex)
-            {
-                Log.Exception(ex);
-                return null;
-            }
+            var appDataDirectory = OtdAppInfo.AppDataDirectory;
+            return appDataDirectory != null ? Path.Combine(appDataDirectory, "Configurations") : configurationDirectory;
         }
     }
 }
