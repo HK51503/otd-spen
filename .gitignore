@@ -3,6 +3,7 @@ obj/
 .vs/
 .idea/
 *.user
+dist/
 
 # Android
 android/.gradle/

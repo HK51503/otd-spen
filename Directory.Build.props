@@ -1,0 +1,15 @@
+<Project>
+
+  <PropertyGroup>
+    <!--
+      Plugin version (four-part, as OTD's plugin repository expects). Keep android/app/build.gradle.kts
+      versionName in step, and bump both when releasing.
+    -->
+    <Version>0.1.0.0</Version>
+    <Authors>HK51503</Authors>
+    <Product>otd-spen</Product>
+    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/HK51503/otd-spen</RepositoryUrl>
+  </PropertyGroup>
+
+</Project>
